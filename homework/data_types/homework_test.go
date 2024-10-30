@@ -11,17 +11,18 @@ import (
 func ToLittleEndian(number uint32) (res uint32) {
 	const (
 		byteLength = 1 << 3
+		mask       = uint32(1<<8 - 1)
 	)
 
-	p := byte(number)
+	p := mask & number
 
 	for i := 24; i >= 0; i -= byteLength {
-		res |= uint32(p) << i
+		res |= p << i
 		number >>= byteLength
 		if number == 0 {
 			return
 		}
-		p = byte(number)
+		p = mask & number
 	}
 
 	return
