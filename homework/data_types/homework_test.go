@@ -8,8 +8,23 @@ import (
 
 // go test -v homework_test.go
 
-func ToLittleEndian(number uint32) uint32 {
-	return 0 // need to implement
+func ToLittleEndian(number uint32) (res uint32) {
+	const (
+		byteLength = 1 << 3
+	)
+
+	p := byte(number)
+
+	for i := 24; i >= 0; i -= byteLength {
+		res |= uint32(p) << i
+		number >>= byteLength
+		if number == 0 {
+			return
+		}
+		p = byte(number)
+	}
+
+	return
 }
 
 func TestSerializationProperties(t *testing.T) {
