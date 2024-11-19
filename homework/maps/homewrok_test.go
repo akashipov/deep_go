@@ -9,32 +9,145 @@ import (
 
 // go test -v homework_test.go
 
+type Node struct {
+	Left   *Node
+	Right  *Node
+	Parent *Node
+	Key    int
+	Value  int
+}
+
 type OrderedMap struct {
-	// need to implement
+	root *Node
+	size int
 }
 
 func NewOrderedMap() OrderedMap {
-	return OrderedMap{} // need to implement
+	return OrderedMap{
+		root: nil,
+		size: 0,
+	}
 }
 
 func (m *OrderedMap) Insert(key, value int) {
-	// need to implement
+	var current *Node
+
+	current = m.root
+	for {
+		if current == nil {
+			m.root = &Node{Key: key, Value: value}
+			m.size++
+			return
+		}
+		if current.Key == key {
+			current.Value = value
+			return
+		} else if current.Key < key {
+			if current.Right == nil {
+				current.Right = &Node{Parent: current, Key: key, Value: value}
+				m.size++
+				return
+			}
+			current = current.Right
+		} else {
+			if current.Left == nil {
+				current.Left = &Node{Parent: current, Key: key, Value: value}
+				m.size++
+				return
+			}
+			current = current.Left
+		}
+	}
+}
+
+func findMax(n *Node) *Node {
+	for n.Right != nil {
+		n = n.Right
+	}
+	return n
+}
+
+func swap(n *Node, other *Node) {
+	n.Value, other.Value = other.Value, n.Value
+	n.Key, other.Key = other.Key, n.Key
 }
 
 func (m *OrderedMap) Erase(key int) {
-	// need to implement
+	current := m.root
+	for {
+		if current == nil {
+			return
+		} else if current.Key == key {
+			defer func() {
+				m.size--
+			}()
+			if current.Left == nil {
+				if current == m.root {
+					m.root = current.Right
+					current.Right.Parent = nil
+					return
+				}
+				if current.Parent.Right == current {
+					current.Parent.Right = current.Right
+					return
+				}
+				current.Parent.Left = current.Right
+				return
+			}
+			n := findMax(current.Left)
+			swap(current, n)
+			if n == current.Left {
+				current.Left = n.Left
+				return
+			}
+			n.Parent.Right = n.Left
+			return
+		} else if current.Key < key {
+			current = current.Right
+			continue
+		}
+		current = current.Left
+	}
 }
 
 func (m *OrderedMap) Contains(key int) bool {
-	return false // need to implement
+	var current *Node
+
+	current = m.root
+	for {
+		if current == nil {
+			return false
+		}
+		if current.Key == key {
+			return true
+		} else if current.Key < key {
+			if current.Right == nil {
+				return false
+			}
+			current = current.Right
+		} else {
+			if current.Left == nil {
+				return false
+			}
+			current = current.Left
+		}
+	}
 }
 
 func (m *OrderedMap) Size() int {
-	return 0 // need to implement
+	return m.size
+}
+
+func iter(action func(int, int), n *Node) {
+	if n != nil {
+		iter(action, n.Left)
+		action(n.Key, n.Value)
+		iter(action, n.Right)
+	}
 }
 
 func (m *OrderedMap) ForEach(action func(int, int)) {
-	// need to implement
+	iter(action, m.root)
 }
 
 func TestCircularQueue(t *testing.T) {
