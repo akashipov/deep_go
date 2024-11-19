@@ -38,8 +38,7 @@ func (m *OrderedMap) Insert(key, value int) {
 			m.root = &Node{Key: key, Value: value}
 			m.size++
 			return
-		}
-		if current.Key == key {
+		} else if current.Key == key {
 			current.Value = value
 			return
 		} else if current.Key < key {
@@ -49,25 +48,24 @@ func (m *OrderedMap) Insert(key, value int) {
 				return
 			}
 			current = current.Right
-		} else {
-			if current.Left == nil {
-				current.Left = &Node{Parent: current, Key: key, Value: value}
-				m.size++
-				return
-			}
-			current = current.Left
+			continue
+		} else if current.Left == nil {
+			current.Left = &Node{Parent: current, Key: key, Value: value}
+			m.size++
+			return
 		}
+		current = current.Left
 	}
 }
 
-func findMax(n *Node) *Node {
+func (m *OrderedMap) findMax(n *Node) *Node {
 	for n.Right != nil {
 		n = n.Right
 	}
 	return n
 }
 
-func swap(n *Node, other *Node) {
+func (m *OrderedMap) swap(n *Node, other *Node) {
 	n.Value, other.Value = other.Value, n.Value
 	n.Key, other.Key = other.Key, n.Key
 }
@@ -94,8 +92,8 @@ func (m *OrderedMap) Erase(key int) {
 				current.Parent.Left = current.Right
 				return
 			}
-			n := findMax(current.Left)
-			swap(current, n)
+			n := m.findMax(current.Left)
+			m.swap(current, n)
 			if n == current.Left {
 				current.Left = n.Left
 				return
@@ -117,20 +115,18 @@ func (m *OrderedMap) Contains(key int) bool {
 	for {
 		if current == nil {
 			return false
-		}
-		if current.Key == key {
+		} else if current.Key == key {
 			return true
 		} else if current.Key < key {
 			if current.Right == nil {
 				return false
 			}
 			current = current.Right
-		} else {
-			if current.Left == nil {
-				return false
-			}
-			current = current.Left
+			continue
+		} else if current.Left == nil {
+			return false
 		}
+		current = current.Left
 	}
 }
 
@@ -139,6 +135,7 @@ func (m *OrderedMap) Size() int {
 }
 
 func iter(action func(int, int), n *Node) {
+	// recursivly - easy but not the best solution
 	if n != nil {
 		iter(action, n.Left)
 		action(n.Key, n.Value)
